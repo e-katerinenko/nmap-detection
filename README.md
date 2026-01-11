@@ -247,6 +247,53 @@ No response after retransmission results in an open|filtered classification.
 <img width="2140" height="192" alt="udp closed" src="https://github.com/user-attachments/assets/af35a6cb-43d3-4613-8c71-2acc73bff9fd" />
 
 <hr>
+<h2>FIN, NULL, XMAS Scans (<code>nmap -sF, -sN, -sX</code>)</h2>
+
+<h3>Overview</h3>
+<p>
+Any packet not containing SYN, ACK or RST flag will result in no response from the open port and RST packet from the closed port. These scan types utilize this by sending no bits at all (TCP header is 0) for NULL scan, FIN flag for FIN scan, and FIN, PSH, and URG flags for Xmas scan. 
+Modern systems often drop unsolicited packets not containing SYN, ACK, RST flags, so these scans might result is showing all ports open since no response would be received.
+</p>
+
+<h3>Packet Flow</h3>
+
+<table border="1" cellpadding="6" cellspacing="0">
+  <tr>
+    <th colspan="2">Open Port</th>
+    <th colspan="2">Closed Port</th>
+  </tr>
+  <tr>
+    <td>Attacker</td><td>Target</td>
+    <td>Attacker</td><td>Target</td>
+  </tr>
+  <tr>
+    <td>SYN →</td><td></td>
+    <td>SYN →</td><td></td>
+  </tr>
+  <tr>
+    <td></td><td></td>
+    <td></td><td>← RST, ACK</td>
+  </tr>
+ </table>
+
+<h3>Scenario</h3>
+
+<pre>
+Kali: open port 22 (SSH)
+sudo systemctl start ssh
+
+Metasploitable 2:
+nmap -sF 10.0.0.2
+nmap -sN 10.0.0.2
+nmap -sX 10.0.0.2
+</pre>
+
+<h3>Wireshark Analysis</h3>
+<p>
+When the scan was conducted from Metasploitable2 to Kali Linux, the Wireshark at Kali logged no packets at all. Since Meta received no response, it marked all scanned ports as open|filtered.
+</p>
+
+<hr>
 
 <h2>Skills Demonstrated</h2>
 <ul>
