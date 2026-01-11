@@ -294,6 +294,189 @@ When the scan was conducted from Metasploitable2 to Kali Linux, the Wireshark at
 </p>
 
 <hr>
+<hr>
+
+<h2>Other Scan Types</h2>
+
+<h3>SCTP INIT Scan (<code>-sY</code>)</h3>
+
+<h4>Overview</h4>
+<p>
+Primarily used for <strong>SS7 / SIGTRAN-related services</strong>.
+This scan is the SCTP equivalent of a TCP SYN scan and does not complete
+the SCTP association.
+</p>
+
+<h4>Packet Flow</h4>
+
+<table border="1" cellpadding="6" cellspacing="0">
+  <tr>
+    <th colspan="2">Open Port</th>
+    <th colspan="2">Closed Port</th>
+  </tr>
+  <tr>
+    <td>Attacker</td><td>Target</td>
+    <td>Attacker</td><td>Target</td>
+  </tr>
+  <tr>
+    <td>INIT →</td><td></td>
+    <td>INIT →</td><td></td>
+  </tr>
+  <tr>
+    <td></td><td>← INIT, ACK</td>
+    <td></td><td>← ABORT</td>
+  </tr>
+</table>
+
+<hr>
+
+<h3>TCP ACK Scan (<code>-sA</code>)</h3>
+
+<h4>Overview</h4>
+<p>
+This scan does <strong>not determine open ports</strong>.
+Instead, it is used to analyze firewall behavior and identify whether
+a firewall is stateful.
+</p>
+
+<ul>
+  <li>An ACK packet is sent to the target</li>
+  <li>No response → port is considered <strong>filtered</strong></li>
+  <li>RST response → port is <strong>unfiltered</strong> (open or closed)</li>
+</ul>
+
+<p>
+Commonly used by attackers to map firewall rules rather than services.
+</p>
+
+<hr>
+
+<h3>TCP Window Scan (<code>-sW</code>)</h3>
+
+<h4>Overview</h4>
+<p>
+This scan examines the <strong>TCP Window field</strong> of RST packets.
+On some systems:
+</p>
+
+<ul>
+  <li>Open ports respond with a <strong>non-zero window size</strong></li>
+  <li>Closed ports respond with a <strong>zero window size</strong></li>
+</ul>
+
+<p>
+This allows Nmap to determine whether an <strong>unfiltered port</strong>
+is open or closed.
+</p>
+
+<p>
+<strong>Limitations:</strong> This scan is not reliable, as only some operating
+systems implement different window sizes for open and closed ports.
+</p>
+
+<hr>
+
+<h3>TCP Maimon Scan (<code>-sM</code>)</h3>
+
+<h4>Overview</h4>
+<p>
+Similar to a FIN scan, but sends <strong>FIN/ACK</strong> packets.
+</p>
+
+<ul>
+  <li>An RST response is expected for both open and closed ports</li>
+  <li>Some BSD-derived systems silently drop packets if the port is open</li>
+</ul>
+
+<p>
+This behavior can allow differentiation between open and closed ports
+on vulnerable systems.
+</p>
+
+<hr>
+
+<h3>SCTP Cookie Echo Scan (<code>-sZ</code>)</h3>
+
+<h4>Overview</h4>
+<p>
+A more advanced SCTP scan that is less obvious as a port scan.
+However, it cannot reliably differentiate between <strong>open</strong>
+and <strong>filtered</strong> ports.
+</p>
+
+<h4>Packet Flow</h4>
+
+<table border="1" cellpadding="6" cellspacing="0">
+  <tr>
+    <th colspan="2">Open Port</th>
+    <th colspan="2">Closed Port</th>
+  </tr>
+  <tr>
+    <td>Attacker</td><td>Target</td>
+    <td>Attacker</td><td>Target</td>
+  </tr>
+  <tr>
+    <td>COOKIE ECHO →</td><td></td>
+    <td>COOKIE ECHO →</td><td></td>
+  </tr>
+  <tr>
+    <td></td><td></td>
+    <td></td><td>← ABORT</td>
+  </tr>
+</table>
+
+<hr>
+
+<h3>Idle Scan (<code>-sI</code>)</h3>
+
+<h4>Overview</h4>
+<p>
+An advanced and stealthy scan that does <strong>not send packets directly
+to the target</strong>.
+Instead, it uses a third-party host (a <em>zombie</em>) with predictable
+IP ID values.
+</p>
+
+<ul>
+  <li>Scanner’s IP address does not appear in target logs</li>
+  <li>Relies on predictable IP ID sequencing</li>
+</ul>
+
+<p>
+<strong>Limitations:</strong> Modern operating systems randomize IP ID values,
+making this scan unreliable in most environments.
+</p>
+
+<hr>
+
+<h3>IP Protocol Scan (<code>-sO</code>)</h3>
+
+<h4>Overview</h4>
+<p>
+Used to determine which <strong>IP protocols</strong> are supported by the target
+system (e.g., TCP, ICMP, IGMP).
+</p>
+
+<p>
+This scan sends IP packet headers and iterates through the
+<strong>8-bit IP protocol field</strong> to identify supported protocols.
+</p>
+
+<hr>
+
+<h2>Cleanup</h2>
+
+<ol>
+  <li>
+    <strong>pfSense:</strong>
+    Disable firewall rules allowing UDP traffic from Metasploitable 2 to Kali.
+  </li>
+  <li>
+    <strong>Kali:</strong>
+    Stop SSH service:
+    <pre>sudo systemctl stop ssh</pre>
+  </li>
+</ol>
 
 <h2>Skills Demonstrated</h2>
 <ul>
